@@ -1,0 +1,54 @@
+body {
+  background: #f5f7fb;
+}
+
+.hero {
+  background: linear-gradient(120deg, #006400, #228b22);
+}
+
+.card {
+  border-radius: 12px;
+}
+
+/* Generic responsive helpers */
+.table-responsive {
+  border-radius: 10px;
+}
+
+@media (max-width: 768px) {
+  h1 {
+    font-size: 1.6rem;
+  }
+
+  h2 {
+    font-size: 1.35rem;
+  }
+
+  h4,
+  h5 {
+    font-size: 1.05rem;
+  }
+
+  .card {
+    padding: 0.85rem !important;
+  }
+
+  .btn {
+    width: 100%;
+    margin-top: 0.35rem;
+  }
+
+  .btn.btn-sm {
+    width: auto;
+  }
+
+  .admin-inline-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+
+  .form-grid-mobile > [class*='col-'] {
+    margin-bottom: 0.35rem;
+  }
+}

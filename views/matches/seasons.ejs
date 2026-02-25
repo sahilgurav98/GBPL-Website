@@ -1,0 +1,6 @@
+<h2>Season-wise Match History</h2>
+<div class="list-group">
+  <% seasonYears.forEach(year => { %>
+    <a class="list-group-item list-group-item-action" href="/seasons/<%= year %>/matches">Season <%= year %></a>
+  <% }) %>
+</div>
