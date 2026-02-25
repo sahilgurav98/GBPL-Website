@@ -1,0 +1,13 @@
+<h2>Admin Dashboard</h2>
+<div class="row g-3">
+  <div class="col-md-3"><div class="card p-3">Teams: <strong><%= teamCount %></strong></div></div>
+  <div class="col-md-3"><div class="card p-3">Players: <strong><%= playerCount %></strong></div></div>
+  <div class="col-md-3"><div class="card p-3">Matches: <strong><%= matchCount %></strong></div></div>
+  <div class="col-md-3"><div class="card p-3">Blogs: <strong><%= blogCount %></strong></div></div>
+</div>
+<div class="mt-4 d-flex gap-2 flex-wrap">
+  <a href="/admin/teams" class="btn btn-dark">Manage Teams</a>
+  <a href="/admin/players" class="btn btn-dark">Manage Players</a>
+  <a href="/admin/matches" class="btn btn-dark">Manage Matches</a>
+  <a href="/admin/blogs" class="btn btn-dark">Manage Blogs</a>
+</div>

@@ -1,0 +1,12 @@
+<div class="row justify-content-center">
+  <div class="col-md-5 card p-4">
+    <h3>Sign Up</h3>
+    <% if (typeof error !== 'undefined') { %><div class="alert alert-danger"><%= error %></div><% } %>
+    <form method="POST" action="/auth/signup">
+      <input class="form-control mb-2" type="text" name="name" placeholder="Full Name" required>
+      <input class="form-control mb-2" type="email" name="email" placeholder="Email" required>
+      <input class="form-control mb-2" type="password" name="password" placeholder="Password" required>
+      <button class="btn btn-primary w-100">Create Account</button>
+    </form>
+  </div>
+</div>

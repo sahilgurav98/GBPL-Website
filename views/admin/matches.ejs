@@ -1,0 +1,61 @@
+<h2>Manage Matches</h2>
+<div class="card p-3 mb-4">
+  <h5>Create Match</h5>
+  <form method="POST" action="/admin/matches" class="row g-2">
+    <div class="col-md-2"><input class="form-control" type="number" name="seasonYear" placeholder="Season" required></div>
+    <div class="col-md-3"><select class="form-select" name="teamA" required><% teams.forEach(t=> { %><option value="<%= t._id %>"><%= t.name %></option><% }) %></select></div>
+    <div class="col-md-3"><select class="form-select" name="teamB" required><% teams.forEach(t=> { %><option value="<%= t._id %>"><%= t.name %></option><% }) %></select></div>
+    <div class="col-md-2"><input class="form-control" type="date" name="date" required></div>
+    <div class="col-md-1"><input class="form-control" type="number" name="overs" placeholder="Overs" required></div>
+    <div class="col-md-1"><button class="btn btn-success">Save</button></div>
+  </form>
+</div>
+
+<div class="card p-3 mb-4">
+  <h5>Enter Scorecard</h5>
+  <form method="POST" action="/admin/matches/scorecard" class="row g-2">
+    <div class="col-md-12">
+      <select class="form-select" name="matchId" required>
+        <option value="">Select Match</option>
+        <% matches.forEach(m => { %><option value="<%= m._id %>"><%= m.teamA.name %> vs <%= m.teamB.name %> (<%= m.seasonYear %>)</option><% }) %>
+      </select>
+    </div>
+    <div class="col-md-4"><input class="form-control" name="teamARuns" placeholder="Team A Runs" required></div>
+    <div class="col-md-4"><input class="form-control" name="teamAWickets" placeholder="Team A Wickets" required></div>
+    <div class="col-md-4"><input class="form-control" name="teamAOvers" placeholder="Team A Overs" required></div>
+    <div class="col-md-4"><input class="form-control" name="teamBRuns" placeholder="Team B Runs" required></div>
+    <div class="col-md-4"><input class="form-control" name="teamBWickets" placeholder="Team B Wickets" required></div>
+    <div class="col-md-4"><input class="form-control" name="teamBOvers" placeholder="Team B Overs" required></div>
+
+    <div class="col-md-3"><select class="form-select" name="battingPlayer"><option value="">Batting Player</option><% players.forEach(p=>{ %><option value="<%= p._id %>"><%= p.name %></option><% }) %></select></div>
+    <div class="col-md-3"><input class="form-control" name="battingRuns" placeholder="Bat Runs"></div>
+    <div class="col-md-3"><input class="form-control" name="battingBalls" placeholder="Bat Balls"></div>
+
+    <div class="col-md-3"><select class="form-select" name="bowlingPlayer"><option value="">Bowling Player</option><% players.forEach(p=>{ %><option value="<%= p._id %>"><%= p.name %></option><% }) %></select></div>
+    <div class="col-md-3"><input class="form-control" name="bowlingOvers" placeholder="Bowl Overs"></div>
+    <div class="col-md-3"><input class="form-control" name="bowlingWickets" placeholder="Bowl Wickets"></div>
+
+    <div class="col-md-3"><button class="btn btn-primary w-100">Save Scorecard</button></div>
+  </form>
+</div>
+
+<table class="table table-bordered">
+  <tr><th>Fixture</th><th>Date</th><th>Status</th><th>Winner</th><th>Complete</th></tr>
+  <% matches.forEach(match => { %>
+    <tr>
+      <td><%= match.teamA.name %> vs <%= match.teamB.name %> (<%= match.seasonYear %>)</td>
+      <td><%= new Date(match.date).toDateString() %></td>
+      <td><%= match.status %></td>
+      <td><%= match.winner ? match.winner.name : '-' %></td>
+      <td>
+        <form method="POST" action="/admin/matches/<%= match._id %>/complete" class="d-flex gap-2">
+          <select class="form-select" name="winner">
+            <option value="<%= match.teamA._id %>"><%= match.teamA.name %></option>
+            <option value="<%= match.teamB._id %>"><%= match.teamB.name %></option>
+          </select>
+          <button class="btn btn-sm btn-warning">Complete</button>
+        </form>
+      </td>
+    </tr>
+  <% }) %>
+</table>
