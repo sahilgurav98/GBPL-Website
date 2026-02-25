@@ -1,0 +1,9 @@
+body {
+  background: #f5f7fb;
+}
+.hero {
+  background: linear-gradient(120deg, #006400, #228b22);
+}
+.card {
+  border-radius: 12px;
+}
