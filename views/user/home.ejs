@@ -1,12 +1,12 @@
 <div class="p-4 mb-3 rounded hero text-white">
   <h1>Gurav Bandhu Premiere League</h1>
-  <p>Cricbuzz-style lightweight portal for village league cricket.</p>
+  <p class="mb-0">Cricbuzz-style lightweight portal for village league cricket.</p>
 </div>
 <h4>Recent Matches</h4>
 <div class="row g-3">
   <% recentMatches.forEach(match => { %>
-    <div class="col-md-6">
-      <div class="card p-3">
+    <div class="col-12 col-md-6">
+      <div class="card p-3 h-100">
         <h5><%= match.teamA.name %> vs <%= match.teamB.name %></h5>
         <p>Season: <%= match.seasonYear %> | <%= new Date(match.date).toDateString() %></p>
         <p>Status: <strong><%= match.status %></strong></p>
