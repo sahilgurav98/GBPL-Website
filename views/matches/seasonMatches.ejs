@@ -1,0 +1,13 @@
+<h2>Season <%= year %> Matches</h2>
+<table class="table table-bordered">
+  <tr><th>Fixture</th><th>Date</th><th>Status</th><th>Winner</th><th>Scorecard</th></tr>
+  <% matches.forEach(match => { %>
+    <tr>
+      <td><%= match.teamA.name %> vs <%= match.teamB.name %></td>
+      <td><%= new Date(match.date).toDateString() %></td>
+      <td><%= match.status %></td>
+      <td><%= match.winner ? match.winner.name : '-' %></td>
+      <td><a href="/matches/<%= match._id %>/scorecard" class="btn btn-sm btn-outline-primary">View</a></td>
+    </tr>
+  <% }) %>
+</table>
