@@ -1,0 +1,76 @@
+<h2>Match Scorecard</h2>
+<% if (!match) { %>
+  <div class="alert alert-danger">Match not found.</div>
+<% } else { %>
+  <h4><%= match.teamA.name %> vs <%= match.teamB.name %></h4>
+  <p>Status: <%= match.status %> <% if (match.winner) { %>| Winner: <strong><%= match.winner.name %></strong><% } %></p>
+
+  <% if (!scorecard) { %>
+    <div class="alert alert-info">Scorecard not available yet.</div>
+  <% } else { %>
+    <h5>Team Scores</h5>
+    <ul>
+      <% scorecard.teamScores.forEach(ts => { %>
+        <li><%= ts.team.name %>: <strong><%= ts.runs %>/<%= ts.wickets %></strong> in <%= ts.overs %> overs</li>
+      <% }) %>
+    </ul>
+
+    <div class="row g-3">
+      <div class="col-12 col-lg-6">
+        <div class="card p-3 h-100">
+          <h5>1st Innings Batting (<%= scorecard.firstBattingTeam?.name || match.teamA.name %>)</h5>
+          <div class="table-responsive">
+            <table class="table table-sm table-bordered">
+              <tr><th>Player</th><th>Runs</th><th>Balls</th></tr>
+              <% (scorecard.firstInningsBatting || scorecard.batting || []).forEach(b => { %>
+                <tr><td><%= b.player.name %></td><td><%= b.runs %></td><td><%= b.balls %></td></tr>
+              <% }) %>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12 col-lg-6">
+        <div class="card p-3 h-100">
+          <h5>1st Innings Bowling</h5>
+          <div class="table-responsive">
+            <table class="table table-sm table-bordered">
+              <tr><th>Player</th><th>Overs</th><th>Wickets</th></tr>
+              <% (scorecard.firstInningsBowling || scorecard.bowling || []).forEach(b => { %>
+                <tr><td><%= b.player.name %></td><td><%= b.overs %></td><td><%= b.wickets %></td></tr>
+              <% }) %>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12 col-lg-6">
+        <div class="card p-3 h-100">
+          <h5>2nd Innings Batting (<%= scorecard.secondBattingTeam?.name || match.teamB.name %>)</h5>
+          <div class="table-responsive">
+            <table class="table table-sm table-bordered">
+              <tr><th>Player</th><th>Runs</th><th>Balls</th></tr>
+              <% (scorecard.secondInningsBatting || []).forEach(b => { %>
+                <tr><td><%= b.player.name %></td><td><%= b.runs %></td><td><%= b.balls %></td></tr>
+              <% }) %>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12 col-lg-6">
+        <div class="card p-3 h-100">
+          <h5>2nd Innings Bowling</h5>
+          <div class="table-responsive">
+            <table class="table table-sm table-bordered">
+              <tr><th>Player</th><th>Overs</th><th>Wickets</th></tr>
+              <% (scorecard.secondInningsBowling || []).forEach(b => { %>
+                <tr><td><%= b.player.name %></td><td><%= b.overs %></td><td><%= b.wickets %></td></tr>
+              <% }) %>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  <% } %>
+<% } %>

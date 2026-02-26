@@ -1,0 +1,28 @@
+<h2>Manage Teams</h2>
+<form method="POST" action="/admin/teams" class="row g-2 mb-4 form-grid-mobile">
+  <div class="col-12 col-md-4"><input class="form-control" name="name" placeholder="Team name" required></div>
+  <div class="col-12 col-md-4"><input class="form-control" name="city" placeholder="Village/City"></div>
+  <div class="col-12 col-md-2"><button class="btn btn-success">Add Team</button></div>
+</form>
+
+<div class="table-responsive">
+  <table class="table table-bordered align-middle">
+    <tr><th>Name</th><th>City</th><th>Actions</th></tr>
+    <% teams.forEach(team => { %>
+      <tr>
+        <td>
+          <form action="/admin/teams/<%= team._id %>?_method=PUT" method="POST" class="d-flex flex-column flex-md-row gap-2">
+            <input class="form-control form-control-sm" name="name" value="<%= team.name %>" required>
+        </td>
+        <td><input class="form-control form-control-sm" name="city" value="<%= team.city || '' %>"></td>
+        <td class="admin-inline-actions">
+            <button class="btn btn-sm btn-primary">Update</button>
+          </form>
+          <form action="/admin/teams/<%= team._id %>?_method=DELETE" method="POST" class="d-inline">
+            <button class="btn btn-sm btn-danger">Delete</button>
+          </form>
+        </td>
+      </tr>
+    <% }) %>
+  </table>
+</div>

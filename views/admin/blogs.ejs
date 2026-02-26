@@ -1,0 +1,25 @@
+<h2>Manage Blogs</h2>
+<form method="POST" action="/admin/blogs" enctype="multipart/form-data" class="card p-3 mb-4">
+  <input class="form-control mb-2" name="title" placeholder="Title" required>
+  <textarea class="form-control mb-2" name="description" placeholder="Description" required></textarea>
+  <select class="form-select mb-2" name="language" required>
+    <option value="English">English</option>
+    <option value="Marathi">Marathi</option>
+  </select>
+  <input class="form-control mb-2" type="file" name="image" accept="image/*">
+  <button class="btn btn-success">Publish Blog</button>
+</form>
+
+<div class="row g-3">
+  <% blogs.forEach(blog => { %>
+    <div class="col-12 col-sm-6 col-lg-4">
+      <div class="card p-2 h-100">
+        <% if (blog.image) { %><img src="<%= blog.image %>" class="img-fluid rounded mb-2" alt="blog" /><% } %>
+        <h5><%= blog.title %></h5>
+        <small><%= blog.language %></small>
+        <p><%= blog.description.substring(0,100) %>...</p>
+        <form action="/admin/blogs/<%= blog._id %>?_method=DELETE" method="POST"><button class="btn btn-sm btn-danger">Delete</button></form>
+      </div>
+    </div>
+  <% }) %>
+</div>

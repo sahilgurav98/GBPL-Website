@@ -1,0 +1,51 @@
+<h2>Manage Matches</h2>
+<div class="card p-3 mb-4">
+  <h5>Create Match</h5>
+  <form method="POST" action="/admin/matches" class="row g-2 form-grid-mobile">
+    <div class="col-6 col-md-2">
+      <label class="form-label">Season</label>
+      <input class="form-control" type="number" name="seasonYear" placeholder="2025" required>
+    </div>
+    <div class="col-12 col-md-3">
+      <label class="form-label">Team A</label>
+      <select class="form-select" name="teamA" required><% teams.forEach(t=> { %><option value="<%= t._id %>"><%= t.name %></option><% }) %></select>
+    </div>
+    <div class="col-12 col-md-3">
+      <label class="form-label">Team B</label>
+      <select class="form-select" name="teamB" required><% teams.forEach(t=> { %><option value="<%= t._id %>"><%= t.name %></option><% }) %></select>
+    </div>
+    <div class="col-8 col-md-2">
+      <label class="form-label">Match Date</label>
+      <input class="form-control" type="date" name="date" required>
+    </div>
+    <div class="col-4 col-md-1">
+      <label class="form-label">Overs</label>
+      <input class="form-control" type="number" name="overs" placeholder="10" required>
+    </div>
+    <div class="col-12 col-md-1 d-flex align-items-end"><button class="btn btn-success">Save</button></div>
+  </form>
+</div>
+
+<div class="table-responsive">
+  <table class="table table-bordered align-middle">
+    <tr><th>Fixture</th><th>Date</th><th>Status</th><th>Winner</th><th>Scorecard</th><th>Complete</th></tr>
+    <% matches.forEach(match => { %>
+      <tr>
+        <td><%= match.teamA.name %> vs <%= match.teamB.name %> (<%= match.seasonYear %>)</td>
+        <td><%= new Date(match.date).toDateString() %></td>
+        <td><%= match.status %></td>
+        <td><%= match.winner ? match.winner.name : '-' %></td>
+        <td><a class="btn btn-sm btn-primary" href="/admin/matches/<%= match._id %>/scorecard">Create / Edit</a></td>
+        <td>
+          <form method="POST" action="/admin/matches/<%= match._id %>/complete" class="d-flex flex-column flex-md-row gap-2">
+            <select class="form-select" name="winner">
+              <option value="<%= match.teamA._id %>"><%= match.teamA.name %></option>
+              <option value="<%= match.teamB._id %>"><%= match.teamB.name %></option>
+            </select>
+            <button class="btn btn-sm btn-warning">Complete</button>
+          </form>
+        </td>
+      </tr>
+    <% }) %>
+  </table>
+</div>

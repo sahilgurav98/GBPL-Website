@@ -1,0 +1,18 @@
+<h2>Player Statistics</h2>
+<div class="table-responsive">
+  <table class="table table-striped table-bordered align-middle">
+    <tr><th>Player</th><th>Team</th><th>Role</th><th>Matches</th><th>Runs</th><th>Balls</th><th>SR</th><th>Wickets</th></tr>
+    <% players.forEach(player => { %>
+      <tr>
+        <td><%= player.name %></td>
+        <td><%= player.team?.name || '-' %></td>
+        <td><%= player.role %></td>
+        <td><%= player.stats.matchesPlayed %></td>
+        <td><%= player.stats.runs %></td>
+        <td><%= player.stats.balls %></td>
+        <td><%= player.stats.strikeRate %></td>
+        <td><%= player.stats.wickets %></td>
+      </tr>
+    <% }) %>
+  </table>
+</div>
