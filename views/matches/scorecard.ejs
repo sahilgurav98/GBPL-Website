@@ -15,14 +15,62 @@
       <% }) %>
     </ul>
 
-    <h5>Batting</h5>
-    <table class="table"><tr><th>Player</th><th>Runs</th><th>Balls</th></tr>
-      <% scorecard.batting.forEach(b => { %><tr><td><%= b.player.name %></td><td><%= b.runs %></td><td><%= b.balls %></td></tr><% }) %>
-    </table>
+    <div class="row g-3">
+      <div class="col-12 col-lg-6">
+        <div class="card p-3 h-100">
+          <h5>1st Innings Batting (<%= scorecard.firstBattingTeam?.name || match.teamA.name %>)</h5>
+          <div class="table-responsive">
+            <table class="table table-sm table-bordered">
+              <tr><th>Player</th><th>Runs</th><th>Balls</th></tr>
+              <% (scorecard.firstInningsBatting || scorecard.batting || []).forEach(b => { %>
+                <tr><td><%= b.player.name %></td><td><%= b.runs %></td><td><%= b.balls %></td></tr>
+              <% }) %>
+            </table>
+          </div>
+        </div>
+      </div>
 
-    <h5>Bowling</h5>
-    <table class="table"><tr><th>Player</th><th>Overs</th><th>Wickets</th></tr>
-      <% scorecard.bowling.forEach(b => { %><tr><td><%= b.player.name %></td><td><%= b.overs %></td><td><%= b.wickets %></td></tr><% }) %>
-    </table>
+      <div class="col-12 col-lg-6">
+        <div class="card p-3 h-100">
+          <h5>1st Innings Bowling</h5>
+          <div class="table-responsive">
+            <table class="table table-sm table-bordered">
+              <tr><th>Player</th><th>Overs</th><th>Wickets</th></tr>
+              <% (scorecard.firstInningsBowling || scorecard.bowling || []).forEach(b => { %>
+                <tr><td><%= b.player.name %></td><td><%= b.overs %></td><td><%= b.wickets %></td></tr>
+              <% }) %>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12 col-lg-6">
+        <div class="card p-3 h-100">
+          <h5>2nd Innings Batting (<%= scorecard.secondBattingTeam?.name || match.teamB.name %>)</h5>
+          <div class="table-responsive">
+            <table class="table table-sm table-bordered">
+              <tr><th>Player</th><th>Runs</th><th>Balls</th></tr>
+              <% (scorecard.secondInningsBatting || []).forEach(b => { %>
+                <tr><td><%= b.player.name %></td><td><%= b.runs %></td><td><%= b.balls %></td></tr>
+              <% }) %>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12 col-lg-6">
+        <div class="card p-3 h-100">
+          <h5>2nd Innings Bowling</h5>
+          <div class="table-responsive">
+            <table class="table table-sm table-bordered">
+              <tr><th>Player</th><th>Overs</th><th>Wickets</th></tr>
+              <% (scorecard.secondInningsBowling || []).forEach(b => { %>
+                <tr><td><%= b.player.name %></td><td><%= b.overs %></td><td><%= b.wickets %></td></tr>
+              <% }) %>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
   <% } %>
 <% } %>

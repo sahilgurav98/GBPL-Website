@@ -25,7 +25,7 @@ const seasonMatches = async (req, res) => {
 
 const matchScorecard = async (req, res) => {
   const match = await Match.findById(req.params.id).populate('teamA teamB winner');
-  const scorecard = await Scorecard.findOne({ match: req.params.id }).populate('teamScores.team batting.player bowling.player');
+  const scorecard = await Scorecard.findOne({ match: req.params.id }).populate('teamScores.team firstBattingTeam secondBattingTeam firstInningsBatting.player firstInningsBowling.player secondInningsBatting.player secondInningsBowling.player batting.player bowling.player');
   res.render('matches/scorecard', { title: 'Match Scorecard', match, scorecard });
 };
 

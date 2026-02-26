@@ -46,3 +46,22 @@ Then:
 - Automatic player stat updates from scorecards
 - Season-wise history, scorecards, player stats, and blogs for users
 - MVC structure with server-side rendering only
+
+
+## Scorecard Workflow (Admin)
+
+1. Go to `Admin -> Manage Matches`.
+2. Click **Create / Edit** on a match.
+3. You will get 4 ready tables:
+   - 1st innings batting
+   - 1st innings bowling
+   - 2nd innings batting
+   - 2nd innings bowling
+4. Enter runs/balls or overs/wickets and save.
+
+Player stats are recalculated from saved scorecards to avoid duplicate counting on edits.
+
+## Player Identity Rule
+
+Players are treated as the same person by name in admin add-player flow.
+If you add the same name in a new season with a different team, the existing player is updated instead of creating a duplicate profile.

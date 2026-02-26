@@ -1,0 +1,119 @@
+<h2>Scorecard Editor</h2>
+<div class="card p-3 mb-3">
+  <h5><%= match.teamA.name %> vs <%= match.teamB.name %> (<%= match.seasonYear %>)</h5>
+  <p class="mb-0">Fill all four ready-made tables: 1st innings batting/bowling + 2nd innings batting/bowling.</p>
+</div>
+
+<form method="POST" action="/admin/matches/scorecard">
+  <input type="hidden" name="matchId" value="<%= match._id %>">
+
+  <div class="card p-3 mb-4">
+    <h5>Team Totals & Innings Order</h5>
+    <div class="row g-3">
+
+      <% const scoreA = scorecard?.teamScores?.find(ts => String(ts.team) === String(match.teamA._id)); %>
+      <p class="text-muted small">1st innings batting team: <strong><%= match.teamA.name %></strong> | 2nd innings batting team: <strong><%= match.teamB.name %></strong></p>
+      <% const scoreB = scorecard?.teamScores?.find(ts => String(ts.team) === String(match.teamB._id)); %>
+
+      <div class="col-12 col-md-6"><h6><%= match.teamA.name %> Score</h6>
+        <div class="row g-2">
+          <div class="col-4"><input class="form-control" type="number" min="0" name="teamARuns" placeholder="Runs" value="<%= scoreA?.runs || 0 %>" required></div>
+          <div class="col-4"><input class="form-control" type="number" min="0" name="teamAWickets" placeholder="Wkts" value="<%= scoreA?.wickets || 0 %>" required></div>
+          <div class="col-4"><input class="form-control" type="number" min="0" step="0.1" name="teamAOvers" placeholder="Overs" value="<%= scoreA?.overs || 0 %>" required></div>
+        </div>
+      </div>
+
+      <div class="col-12 col-md-6"><h6><%= match.teamB.name %> Score</h6>
+        <div class="row g-2">
+          <div class="col-4"><input class="form-control" type="number" min="0" name="teamBRuns" placeholder="Runs" value="<%= scoreB?.runs || 0 %>" required></div>
+          <div class="col-4"><input class="form-control" type="number" min="0" name="teamBWickets" placeholder="Wkts" value="<%= scoreB?.wickets || 0 %>" required></div>
+          <div class="col-4"><input class="form-control" type="number" min="0" step="0.1" name="teamBOvers" placeholder="Overs" value="<%= scoreB?.overs || 0 %>" required></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <% const firstBattingMap = new Map((scorecard?.firstInningsBatting || []).map(e => [String(e.player), e])); %>
+  <% const firstBowlingMap = new Map((scorecard?.firstInningsBowling || []).map(e => [String(e.player), e])); %>
+  <% const secondBattingMap = new Map((scorecard?.secondInningsBatting || []).map(e => [String(e.player), e])); %>
+  <% const secondBowlingMap = new Map((scorecard?.secondInningsBowling || []).map(e => [String(e.player), e])); %>
+
+  <div class="row g-3">
+    <div class="col-12 col-lg-6">
+      <div class="card p-3 h-100">
+        <h5>1st Innings Batting (<%= match.teamA.name %>)</h5>
+        <div class="table-responsive">
+          <table class="table table-sm table-bordered align-middle">
+            <tr><th>Player</th><th>Runs</th><th>Balls</th></tr>
+            <% teamAPlayers.forEach(player => { const row = firstBattingMap.get(String(player._id)); %>
+              <tr>
+                <td><%= player.name %></td>
+                <td><input class="form-control form-control-sm" type="number" min="0" name="firstBattingRuns[<%= player._id %>]" value="<%= row?.runs || 0 %>"></td>
+                <td><input class="form-control form-control-sm" type="number" min="0" name="firstBattingBalls[<%= player._id %>]" value="<%= row?.balls || 0 %>"></td>
+              </tr>
+            <% }) %>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-lg-6">
+      <div class="card p-3 h-100">
+        <h5>1st Innings Bowling (<%= match.teamB.name %>)</h5>
+        <div class="table-responsive">
+          <table class="table table-sm table-bordered align-middle">
+            <tr><th>Player</th><th>Overs</th><th>Wickets</th></tr>
+            <% teamBPlayers.forEach(player => { const row = firstBowlingMap.get(String(player._id)); %>
+              <tr>
+                <td><%= player.name %></td>
+                <td><input class="form-control form-control-sm" type="number" min="0" step="0.1" name="firstBowlingOvers[<%= player._id %>]" value="<%= row?.overs || 0 %>"></td>
+                <td><input class="form-control form-control-sm" type="number" min="0" name="firstBowlingWickets[<%= player._id %>]" value="<%= row?.wickets || 0 %>"></td>
+              </tr>
+            <% }) %>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-lg-6">
+      <div class="card p-3 h-100">
+        <h5>2nd Innings Batting (<%= match.teamB.name %>)</h5>
+        <div class="table-responsive">
+          <table class="table table-sm table-bordered align-middle">
+            <tr><th>Player</th><th>Runs</th><th>Balls</th></tr>
+            <% teamBPlayers.forEach(player => { const row = secondBattingMap.get(String(player._id)); %>
+              <tr>
+                <td><%= player.name %></td>
+                <td><input class="form-control form-control-sm" type="number" min="0" name="secondBattingRuns[<%= player._id %>]" value="<%= row?.runs || 0 %>"></td>
+                <td><input class="form-control form-control-sm" type="number" min="0" name="secondBattingBalls[<%= player._id %>]" value="<%= row?.balls || 0 %>"></td>
+              </tr>
+            <% }) %>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-lg-6">
+      <div class="card p-3 h-100">
+        <h5>2nd Innings Bowling (<%= match.teamA.name %>)</h5>
+        <div class="table-responsive">
+          <table class="table table-sm table-bordered align-middle">
+            <tr><th>Player</th><th>Overs</th><th>Wickets</th></tr>
+            <% teamAPlayers.forEach(player => { const row = secondBowlingMap.get(String(player._id)); %>
+              <tr>
+                <td><%= player.name %></td>
+                <td><input class="form-control form-control-sm" type="number" min="0" step="0.1" name="secondBowlingOvers[<%= player._id %>]" value="<%= row?.overs || 0 %>"></td>
+                <td><input class="form-control form-control-sm" type="number" min="0" name="secondBowlingWickets[<%= player._id %>]" value="<%= row?.wickets || 0 %>"></td>
+              </tr>
+            <% }) %>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="mt-3 d-flex gap-2 flex-wrap">
+    <button class="btn btn-success">Save Scorecard</button>
+    <a href="/admin/matches" class="btn btn-outline-secondary">Back to Matches</a>
+  </div>
+</form>

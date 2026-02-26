@@ -4,6 +4,62 @@ const Match = require('../models/Match');
 const Blog = require('../models/Blog');
 const Scorecard = require('../models/Scorecard');
 
+const normalizeName = (name = '') => name.trim().toLowerCase();
+
+const toNumber = (value) => Number(value || 0);
+
+const aggregatePlayerStats = async () => {
+  const players = await Player.find();
+  const playerStatsMap = new Map();
+
+  players.forEach((player) => {
+    playerStatsMap.set(String(player._id), {
+      player,
+      runs: 0,
+      balls: 0,
+      wickets: 0,
+      matches: new Set()
+    });
+  });
+
+  const scorecards = await Scorecard.find();
+
+  for (const card of scorecards) {
+    const battingCollections = [card.firstInningsBatting || [], card.secondInningsBatting || [], card.batting || []];
+    const bowlingCollections = [card.firstInningsBowling || [], card.secondInningsBowling || [], card.bowling || []];
+
+    battingCollections.forEach((entries) => {
+      entries.forEach((entry) => {
+        const key = String(entry.player);
+        const bucket = playerStatsMap.get(key);
+        if (!bucket) return;
+        bucket.runs += toNumber(entry.runs);
+        bucket.balls += toNumber(entry.balls);
+        bucket.matches.add(String(card.match));
+      });
+    });
+
+    bowlingCollections.forEach((entries) => {
+      entries.forEach((entry) => {
+        const key = String(entry.player);
+        const bucket = playerStatsMap.get(key);
+        if (!bucket) return;
+        bucket.wickets += toNumber(entry.wickets);
+        bucket.matches.add(String(card.match));
+      });
+    });
+  }
+
+  for (const { player, runs, balls, wickets, matches } of playerStatsMap.values()) {
+    player.stats.matchesPlayed = matches.size;
+    player.stats.runs = runs;
+    player.stats.balls = balls;
+    player.stats.wickets = wickets;
+    player.stats.strikeRate = balls ? Number(((runs / balls) * 100).toFixed(2)) : 0;
+    await player.save();
+  }
+};
+
 const dashboard = async (req, res) => {
   const [teamCount, playerCount, matchCount, blogCount] = await Promise.all([
     Team.countDocuments(),
@@ -41,13 +97,26 @@ const getPlayers = async (req, res) => {
 
 const createPlayer = async (req, res) => {
   const { name, age, role, team } = req.body;
-  await Player.create({ name, age, role, team });
+  const cleanedName = (name || '').trim();
+
+  const existing = await Player.findOne({ name: new RegExp(`^${cleanedName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') });
+
+  if (existing) {
+    existing.name = cleanedName;
+    existing.age = age;
+    existing.role = role;
+    existing.team = team;
+    await existing.save();
+  } else {
+    await Player.create({ name: cleanedName, age, role, team });
+  }
+
   res.redirect('/admin/players');
 };
 
 const updatePlayer = async (req, res) => {
   const { name, age, role, team } = req.body;
-  await Player.findByIdAndUpdate(req.params.id, { name, age, role, team });
+  await Player.findByIdAndUpdate(req.params.id, { name: (name || '').trim(), age, role, team });
   res.redirect('/admin/players');
 };
 
@@ -57,12 +126,11 @@ const deletePlayer = async (req, res) => {
 };
 
 const getMatches = async (req, res) => {
-  const [matches, teams, players] = await Promise.all([
+  const [matches, teams] = await Promise.all([
     Match.find().populate('teamA teamB winner').sort({ date: -1 }),
-    Team.find().sort('name'),
-    Player.find().populate('team').sort('name')
+    Team.find().sort('name')
   ]);
-  res.render('admin/matches', { title: 'Manage Matches', matches, teams, players });
+  res.render('admin/matches', { title: 'Manage Matches', matches, teams });
 };
 
 const createMatch = async (req, res) => {
@@ -77,61 +145,88 @@ const markMatchCompleted = async (req, res) => {
   res.redirect('/admin/matches');
 };
 
-const saveScorecard = async (req, res) => {
-  const { matchId, teamARuns, teamAWickets, teamAOvers, teamBRuns, teamBWickets, teamBOvers, battingPlayer, battingRuns, battingBalls, bowlingPlayer, bowlingOvers, bowlingWickets } = req.body;
-
-  const match = await Match.findById(matchId);
+const getScorecardEditor = async (req, res) => {
+  const match = await Match.findById(req.params.id).populate('teamA teamB');
   if (!match) return res.redirect('/admin/matches');
 
-  const battingEntries = (Array.isArray(battingPlayer) ? battingPlayer : [battingPlayer]).map((player, idx) => ({
-    player,
-    runs: Number(Array.isArray(battingRuns) ? battingRuns[idx] : battingRuns),
-    balls: Number(Array.isArray(battingBalls) ? battingBalls[idx] : battingBalls)
-  })).filter((item) => item.player);
+  const [teamAPlayers, teamBPlayers, scorecard] = await Promise.all([
+    Player.find({ team: match.teamA._id }).sort('name'),
+    Player.find({ team: match.teamB._id }).sort('name'),
+    Scorecard.findOne({ match: match._id })
+  ]);
 
-  const bowlingEntries = (Array.isArray(bowlingPlayer) ? bowlingPlayer : [bowlingPlayer]).map((player, idx) => ({
-    player,
-    overs: Number(Array.isArray(bowlingOvers) ? bowlingOvers[idx] : bowlingOvers),
-    wickets: Number(Array.isArray(bowlingWickets) ? bowlingWickets[idx] : bowlingWickets)
-  })).filter((item) => item.player);
+  res.render('admin/scorecardEditor', {
+    title: 'Scorecard Editor',
+    match,
+    teamAPlayers,
+    teamBPlayers,
+    scorecard
+  });
+};
 
-  let scorecard = await Scorecard.findOne({ match: matchId });
-  const payload = {
-    match: matchId,
-    teamScores: [
-      { team: match.teamA, runs: Number(teamARuns), wickets: Number(teamAWickets), overs: Number(teamAOvers) },
-      { team: match.teamB, runs: Number(teamBRuns), wickets: Number(teamBWickets), overs: Number(teamBOvers) }
-    ],
-    batting: battingEntries,
-    bowling: bowlingEntries
+const buildBattingEntries = (players, teamId, runsPayload = {}, ballsPayload = {}) => players.map((player) => ({
+  player: player._id,
+  team: teamId,
+  runs: toNumber(runsPayload[String(player._id)]),
+  balls: toNumber(ballsPayload[String(player._id)])
+}));
+
+const buildBowlingEntries = (players, teamId, oversPayload = {}, wicketsPayload = {}) => players.map((player) => ({
+  player: player._id,
+  team: teamId,
+  overs: toNumber(oversPayload[String(player._id)]),
+  wickets: toNumber(wicketsPayload[String(player._id)])
+}));
+
+const saveScorecard = async (req, res) => {
+  const { matchId, teamARuns, teamAWickets, teamAOvers, teamBRuns, teamBWickets, teamBOvers } = req.body;
+
+  const match = await Match.findById(matchId).populate('teamA teamB');
+  if (!match) return res.redirect('/admin/matches');
+
+  const firstBatting = match.teamA;
+  const secondBatting = match.teamB;
+
+  const [teamAPlayers, teamBPlayers] = await Promise.all([
+    Player.find({ team: match.teamA._id }),
+    Player.find({ team: match.teamB._id })
+  ]);
+
+  const playersByTeam = {
+    [String(match.teamA._id)]: teamAPlayers,
+    [String(match.teamB._id)]: teamBPlayers
   };
 
-  if (scorecard) scorecard = await Scorecard.findByIdAndUpdate(scorecard._id, payload, { new: true });
-  else scorecard = await Scorecard.create(payload);
+  const firstInningsBattingPlayers = playersByTeam[String(firstBatting._id)] || [];
+  const firstInningsBowlingPlayers = playersByTeam[String(secondBatting._id)] || [];
+  const secondInningsBattingPlayers = playersByTeam[String(secondBatting._id)] || [];
+  const secondInningsBowlingPlayers = playersByTeam[String(firstBatting._id)] || [];
+
+  const payload = {
+    match: match._id,
+    teamScores: [
+      { team: match.teamA._id, runs: toNumber(teamARuns), wickets: toNumber(teamAWickets), overs: toNumber(teamAOvers) },
+      { team: match.teamB._id, runs: toNumber(teamBRuns), wickets: toNumber(teamBWickets), overs: toNumber(teamBOvers) }
+    ],
+    firstBattingTeam: firstBatting._id,
+    secondBattingTeam: secondBatting._id,
+    firstInningsBatting: buildBattingEntries(firstInningsBattingPlayers, firstBatting._id, req.body.firstBattingRuns, req.body.firstBattingBalls),
+    firstInningsBowling: buildBowlingEntries(firstInningsBowlingPlayers, secondBatting._id, req.body.firstBowlingOvers, req.body.firstBowlingWickets),
+    secondInningsBatting: buildBattingEntries(secondInningsBattingPlayers, secondBatting._id, req.body.secondBattingRuns, req.body.secondBattingBalls),
+    secondInningsBowling: buildBowlingEntries(secondInningsBowlingPlayers, firstBatting._id, req.body.secondBowlingOvers, req.body.secondBowlingWickets)
+  };
+
+  const existing = await Scorecard.findOne({ match: match._id });
+  const scorecard = existing
+    ? await Scorecard.findByIdAndUpdate(existing._id, payload, { new: true })
+    : await Scorecard.create(payload);
 
   match.scorecard = scorecard._id;
   await match.save();
 
-  // Update player aggregate stats after score entry.
-  for (const bat of battingEntries) {
-    const player = await Player.findById(bat.player);
-    if (!player) continue;
-    player.stats.matchesPlayed += 1;
-    player.stats.runs += bat.runs;
-    player.stats.balls += bat.balls;
-    player.stats.strikeRate = player.stats.balls ? Number(((player.stats.runs / player.stats.balls) * 100).toFixed(2)) : 0;
-    await player.save();
-  }
+  await aggregatePlayerStats();
 
-  for (const bowl of bowlingEntries) {
-    const player = await Player.findById(bowl.player);
-    if (!player) continue;
-    player.stats.matchesPlayed += 1;
-    player.stats.wickets += bowl.wickets;
-    await player.save();
-  }
-
-  res.redirect('/admin/matches');
+  res.redirect(`/admin/matches/${match._id}/scorecard`);
 };
 
 const getBlogs = async (req, res) => {
@@ -167,6 +262,7 @@ module.exports = {
   deletePlayer,
   getMatches,
   createMatch,
+  getScorecardEditor,
   saveScorecard,
   markMatchCompleted,
   getBlogs,

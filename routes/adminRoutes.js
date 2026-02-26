@@ -21,6 +21,7 @@ router.delete('/players/:id', adminController.deletePlayer);
 
 router.get('/matches', adminController.getMatches);
 router.post('/matches', adminController.createMatch);
+router.get('/matches/:id/scorecard', adminController.getScorecardEditor);
 router.post('/matches/scorecard', adminController.saveScorecard);
 router.post('/matches/:id/complete', adminController.markMatchCompleted);
 
